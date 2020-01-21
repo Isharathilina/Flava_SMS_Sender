@@ -48,18 +48,18 @@ void setup()
     }
   }
  
-  client.publish("flava", "hello"); //Topic name
-  client.subscribe("flava1");
+  client.publish("flavaSMS", "hello"); //Topic name
+  client.subscribe("flava");
  
   
 //Initialize GSM--------------------
   int gsmInitFlag=0;
   while(gsmInitFlag==0)
   {
-    Serial.println("Initialize GSM");
+    Serial.println("Initializing GSM");
     if(InitGsm()==1)
     {
-    Serial.print("GSM OK");
+    Serial.println("GSM OK");
     gsmInitFlag=1;
     }else
     {
@@ -67,14 +67,14 @@ void setup()
     delay(500);
     }
   }
-  //Sendsms("0779178744","helo");
+
 //check network status---------------
   int checkNetworkFlag=0;
- // while(checkNetworkFlag==0)
-  //{
-  
+  while(checkNetworkFlag==0)
+  {
     Serial.print("strength :- ");
     Serial.println(GetsingalStrength());
+  
     Serial.println("Connectig..");
     if(CheckNetwork()==1)
     {
@@ -85,7 +85,9 @@ void setup()
     Serial.println("Network Fail");
     delay(500);
     }
-  //}
+  }
+
+  //Sendsms("0779178744","helo");
 
 }
 
@@ -93,44 +95,12 @@ void setup()
 void loop()
 {
    client.loop();
-   client.publish("flava", "hello");
+   client.publish("flavaSMS", "hello");
    delay(1000);
   
 }
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-// mqtt callback
-
-// void callback(char* topic, byte* payload, unsigned int length) {
-  
-  // char msgCharArray[length];
-  // Serial.print("Message arrived in topic: ");
-  // Serial.println(topic);
- 
-  // Serial.print("Message:");
-  // for (int i = 0; i < length; i++)
-  // {
-    // //Serial.print((char)payload[i]);
-  // msgCharArray[i] = (char)payload[i];
-  // }
- 
-  // Serial.println(msgCharArray);
-  // Serial.println("-----------------------");
- 
-// }
- 
-
 void callback(char* topic, byte* payload, unsigned int length)
 {
  
@@ -176,10 +146,11 @@ void callback(char* topic, byte* payload, unsigned int length)
     count++;
   }
   
-  Serial.print("data1 :- ");
+  Serial.print("Number :- ");
   Serial.println(strData[0]);
-  Serial.print("data2 :- ");
+  Serial.print("Messageg :- ");
   Serial.println(strData[1]);
+  Sendsms(strData[0],strData[1]);
 
  free(dataArry);
 }
@@ -216,11 +187,10 @@ int GetsingalStrength()
   int b = response.indexOf(',');
   
   String strength = response.substring(a+1, b);   // strength value
- #if defined(PrintSerialMonitor)
-  Serial.print("Signal strength:- ");
-  Serial.println(strength);
- #endif
-  
+
+  //Serial.print("Signal strength:- ");
+ // Serial.println(strength);
+ 
   return strength.toInt();
 }
 
@@ -247,14 +217,19 @@ int CheckNetwork()
   {
     response.concat((char)Serial2.read());
   }
-    
-  //Serial.println(response);     // responce format +CREG: 1,1
-  //Serial.println(response.charAt(18));
-  //Serial.println(response.charAt(20));
   
-  if(response.charAt(18)=='0' or response.charAt(18)=='6')
+  
+  //Serial.println("response:");
+  //Serial.println(response);     // responce format +CREG: 1,1
+  //Serial.println(response.indexOf(':'));
+  //Serial.println(response.indexOf('G'));
+  
+  //Serial.println(response.charAt(28));
+  //Serial.println(response.charAt(30));
+  
+  if(response.charAt(28)=='0' or response.charAt(28)=='6')
   { //char 18 and 20 became 0,1 on home network
-    if(response.charAt(20)=='1')
+    if(response.charAt(30)=='1')
   {
       #if defined(PrintSerialMonitor)
       Serial.println("Network Ok");
@@ -294,9 +269,10 @@ int InitGsm()
   {
     response.concat((char)Serial2.read());  //responce string have AT +OK 
   }
-    
-  String cmd = response.substring(6,8); //substring OK part
-  if(!(cmd.indexOf("OK")==-1))
+   
+  //Serial.println(response);
+  //String cmd = response.substring(6,8); //substring OK part
+  if(!(response.indexOf("OK")==-1))
   {   //if true Gsm return ok
     gsm=1;
   }
@@ -309,7 +285,7 @@ int InitGsm()
 int Sendsms(String num, String msg){
 
   Serial2.print("AT\r\n");
-  delay(500);
+  //delay(500);
   while(!Serial2.available());  //ready gsm
   
   while(Serial2.available())
@@ -319,24 +295,22 @@ int Sendsms(String num, String msg){
   }
     
   Serial2.print("AT+CMGF=1\r\n");   // Text Mode
-  delay(1000);
+  delay(100);
   
   Serial2.print("AT+CMGS=\"");
   Serial2.print(num);
   Serial2.print("\"\r\n");
-  delay(1000);
+  delay(100);
   
   Serial2.println(msg);
-  delay(500);
+  delay(50);
   Serial2.println((char)26);    //CTRL+Z  for end msg
-  delay(500);
+  delay(50);
     
-  #if defined(PrintSerialMonitor)
   Serial.print("Msg sent to ");
   Serial.print(num);
   Serial.print(" \r\n");
-  #endif
-  
+
   return 1;
   
 }
