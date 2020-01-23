@@ -2,13 +2,13 @@
 #include <PubSubClient.h>
  
 #define PrintSerialMonitor  //if define it, print on serial monitor 
-//#define DEBUG
+#define DEBUG
 const char* ssid = "RTXMaster"; // Enter your WiFi name
 const char* password =  "RTX_net_passC0de#"; // Enter WiFi password
-const char* mqttServer = "soldier.cloudmqtt.com";
-const int mqttPort = 12729;
-const char* mqttUser = "ciyajbsc";
-const char* mqttPassword = "je1T5MADj3Wi";
+const char* mqttServer = "tailor.cloudmqtt.com";
+const int mqttPort = 10628;
+const char* mqttUser = "wqdjaxnz";
+const char* mqttPassword = "AeiF4k4sTkOQ";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -95,15 +95,17 @@ void setup()
 void loop()
 {
    client.loop();
-   client.publish("flavaSMS", "hello");
-   delay(1000);
+   //client.publish("flavaSMS", "Service runing..");
+   //delay(1000);
   
 }
   
   
 void callback(char* topic, byte* payload, unsigned int length)
 {
- 
+
+  //client.publish("flavaSMS", "data received..!");
+   
   #ifdef DEBUG
   Serial.print("Message arrived in topic: ");
   Serial.println(topic);
@@ -219,17 +221,17 @@ int CheckNetwork()
   }
   
   
-  //Serial.println("response:");
+  Serial.println("response:");
   //Serial.println(response);     // responce format +CREG: 1,1
   //Serial.println(response.indexOf(':'));
   //Serial.println(response.indexOf('G'));
   
-  //Serial.println(response.charAt(28));
-  //Serial.println(response.charAt(30));
+  Serial.println(response.charAt(28));
+  Serial.println(response.charAt(30));
   
   if(response.charAt(28)=='0' or response.charAt(28)=='6')
   { //char 18 and 20 became 0,1 on home network
-    if(response.charAt(30)=='1')
+    if(response.charAt(30)=='1' or response.charAt(30)=='5')
   {
       #if defined(PrintSerialMonitor)
       Serial.println("Network Ok");
@@ -285,7 +287,7 @@ int InitGsm()
 int Sendsms(String num, String msg){
 
   Serial2.print("AT\r\n");
-  //delay(500);
+  delay(500);
   while(!Serial2.available());  //ready gsm
   
   while(Serial2.available())
@@ -310,6 +312,8 @@ int Sendsms(String num, String msg){
   Serial.print("Msg sent to ");
   Serial.print(num);
   Serial.print(" \r\n");
+
+  client.publish("flavaSMS", "SMS sent..");
 
   return 1;
   
