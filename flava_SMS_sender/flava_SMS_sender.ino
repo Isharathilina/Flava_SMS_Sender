@@ -35,7 +35,7 @@ void setup()
   while (!client.connected()) {
     Serial.println("Connecting to MQTT...");
  
-    if (client.connect("ESP8266Client", mqttUser, mqttPassword )) {
+    if (client.connect("ESPclient", mqttUser, mqttPassword )) {
  
       Serial.println("connected");  
  
@@ -94,7 +94,8 @@ void setup()
 
 void loop()
 {
-   client.loop();
+	tryToConnect();
+	client.loop();
    //client.publish("flavaSMS", "Service runing..");
    //delay(1000);
   
@@ -157,6 +158,37 @@ void callback(char* topic, byte* payload, unsigned int length)
  free(dataArry);
 }
  
+
+
+void tryToConnect()
+{
+  if (WiFi.status() != WL_CONNECTED) 
+  {
+    delay(500);
+    Serial.println("Not connect to wifi");
+  }
+  
+    if (!client.connected()) 
+  {
+    Serial.println("Not connect to MQTT ");
+ 
+    if (client.connect("ESPclient", mqttUser, mqttPassword )) {
+ 
+      Serial.println("connected");  
+ 
+    } else
+  {
+ 
+      Serial.print("failed with state ");
+      Serial.print(client.state());
+      
+    }
+  }
+
+
+}
+ 
+
 
 
 int GetsingalStrength()
