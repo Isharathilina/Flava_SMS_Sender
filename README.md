@@ -6,5 +6,6 @@
 * MQTT
 * SIM 800 GSM module
 
-## Peoject Discription
+## Project Description
 low-cost SMS gateway for Send SMS through GSM module <br> from cloud MQTT request
+
